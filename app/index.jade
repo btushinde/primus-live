@@ -1,0 +1,18 @@
+!!!
+html(lang='en')
+  head
+    meta(charset='utf-8')
+    title Primus
+    script(src='/primus/primus.js')
+    script(src='/reload/reload.js')
+    link(rel='stylesheet', href='http://getbootstrap.com/dist/css/bootstrap.css')
+    link(rel='stylesheet', media='all', href='app.css')
+
+  body
+    .jumbotron
+      .container
+        h1 Primus
+        p.lead.
+          Live reload demo with Jade, Stylus, and CoffeeScript auto-compilation.
+        p#connect.btn.btn-outline-inverse.btn-lg connected
+    #output
