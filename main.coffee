@@ -31,7 +31,7 @@ server = http.createServer (req, res) ->
     #   return sendResult 'application/javascript', primus.library()
     if req.uri.pathname is '/reload/reload.js'
       return sendResult 'application/javascript', coffee.compile '''
-        window.primus = new Primus(window.document.URL)
+        window.primus = new Primus
         primus.on 'data', (data) ->
           if data is true
             window.location.reload true

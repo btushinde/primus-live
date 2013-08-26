@@ -4,7 +4,8 @@ Primus Live
 This is a simple development setup for Node.js apps, with minimal dependencies
 on other packages and maximal freedom to organise the application source files:
 
-* uses [Primus][P] for managing a WebSocket connection between server and client
+* uses [Primus][P] to manage a WebSocket connection between server and client
+* uses [node-static][N] to serve all static files in the `app/` folder
 * can compile [Jade][J] (.jade) and [MarkDown][M] (.md) files to HMTL (.html)
 * can compile [Stylus][S] (.styl) files to CSS (.css)
 * can compile [CoffeeScript][C] (.coffee) files to JavaScript (.js)
@@ -25,11 +26,11 @@ Stylus, and CoffeeScript:
 html(lang='en')
   head
     meta(charset='utf-8')
-    title Primus
+    title Primus Live
     script(src='/primus/primus.js')
     script(src='/reload/reload.js')
-    link(rel='stylesheet', href='http://getbootstrap.com/dist/css/bootstrap.css')
-    link(rel='stylesheet', media='all', href='app.css')
+    link(rel='stylesheet',href='http://getbootstrap.com/dist/css/bootstrap.css')
+    link(rel='stylesheet',media='all',href='app.css')
 
   body
     .jumbotron
@@ -72,7 +73,7 @@ This is is particularly easy to do with single-page applications.
 To disable live-reloading, you can replace the `reload.js` script with:
 
 ```html
-<script>window.primus = new Primus(document.URL);</script>
+<script>window.primus = new Primus();</script>
 ```
 
 Note: live-reload is implemented by sending `true` or `false` over the WebSocket
@@ -91,3 +92,4 @@ MIT
 [M]: http://daringfireball.net/projects/markdown/
 [E]: https://github.com/LearnBoost/engine.io
 [X]: https://github.com/3rd-Eden/primus/tree/master/example
+[N]: https://github.com/cloudhead/node-static
