@@ -17,9 +17,8 @@ moreFiles = new Server './bower_components'
 server = http.createServer (request, response) ->
 
   setResponse = (mime, data) ->
-    response.writeHead 200,
-      'Content-Type': mime
-      'Content-Length': Buffer.byteLength data
+    bytes = Buffer.byteLength data
+    response.writeHead 200, 'Content-Type': mime, 'Content-Length': bytes
     response.end data
 
   serveStaticOrCompiled = (files, fail) ->
@@ -39,15 +38,15 @@ server = http.createServer (request, response) ->
 
         switch
           when canTransform '.html', '.jade'
-            setResponse 'text/html', do jade.compile data, { filename: src }
+            setResponse 'text/html', do jade.compile data, filename: src
           when canTransform '.html', '.md'
             setResponse 'text/html', marked data
           when canTransform '.js', '.coffee', '.coffee.md', '.litcoffee'
             setResponse 'application/javascript', coffee.compile data
           when canTransform '.css', '.styl'
-            stylus.render data, { filename: src }, (err, css) ->
-              if err
-                console.warn 'stylus error', err
+            stylus.render data, filename: src, (e, css) ->
+              if e
+                console.warn 'stylus error', e.message
                 fail err
               else
                 setResponse 'text/css', css
@@ -74,11 +73,9 @@ server = http.createServer (request, response) ->
 
 primus = new Primus server, transformer: 'engine.io'
 
-primus.on 'connection', (socket) ->
-  console.info 'new connection', new Date
-  socket.on 'data', (msg) ->
-    console.info 'msg', msg
-    primus.write ping: msg # broadcast (use socket.write for single reply)
+try # silently ignore a missing module
+  services = require "#{process.cwd()}/services"
+services? primus
 
 # recursive directory watcher, FIXME: directories added later don't get watched
 watch = (path, cb) ->
