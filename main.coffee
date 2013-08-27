@@ -14,18 +14,18 @@ Primus = require 'primus'
 appFiles = new Server './app'
 moreFiles = new Server './bower_components'
 
-server = http.createServer (req, res) ->
+server = http.createServer (request, response) ->
 
   setResponse = (mime, data) ->
-    res.writeHead 200,
+    response.writeHead 200,
       'Content-Type': mime
       'Content-Length': Buffer.byteLength data
-    res.end data
+    response.end data
 
   serveStaticOrCompiled = (files, fail) ->
-    files.serve req, res, (err) ->
+    files.serve request, response, (err) ->
       if err
-        dest = files.root + req.uri.pathname
+        dest = files.root + request.uri.pathname
         dest += '/index.html'  if dest.substr(-1) is '/'
         src = data = undefined
 
@@ -47,16 +47,16 @@ server = http.createServer (req, res) ->
           when canTransform '.css', '.styl'
             stylus.render data, { filename: src }, (err, css) ->
               if err
-                console.log 'stylus error', err
-                do fail
+                console.warn 'stylus error', err
+                fail err
               else
                 setResponse 'text/css', css
           else
-            do fail
+            fail err
 
-  req.resume()
-  req.on 'end', ->
-    if req.uri.pathname is '/reload/reload.js'
+  request.resume()
+  request.on 'end', ->
+    if request.uri.pathname is '/reload/reload.js'
       return setResponse 'application/javascript', coffee.compile '''
         window.primus = new Primus
         primus.on 'data', (data) ->
@@ -67,17 +67,17 @@ server = http.createServer (req, res) ->
               if e.href and /stylesheet/i.test e.rel
                 e.href = "#{e.href.replace /\\?.*/, ''}?#{Date.now()}"
       '''
-    serveStaticOrCompiled appFiles, ->
-      serveStaticOrCompiled moreFiles, ->
-        res.writeHead err.status, err.headers
-        res.end err.message
+    serveStaticOrCompiled appFiles, (err) ->
+      serveStaticOrCompiled moreFiles, (err) ->
+        response.writeHead err.status, err.headers
+        response.end err.message
 
 primus = new Primus server, transformer: 'engine.io'
 
 primus.on 'connection', (socket) ->
-  console.log 'new connection'
+  console.info 'new connection', new Date
   socket.on 'data', (msg) ->
-    console.log 'msg', msg
+    console.info 'msg', msg
     primus.write ping: msg # broadcast (use socket.write for single reply)
 
 # recursive directory watcher, FIXME: directories added later don't get watched
@@ -92,7 +92,7 @@ watch = (path, cb) ->
 
 watch appFiles.root, (event, path) ->
   reload = not /\.(css|styl)$/.test path
-  console.log 'reload:', reload, '-', event, path
+  console.info 'reload:', reload, '-', event, path
   primus.write reload  # broadcast true or false
 
 server.listen 8080
