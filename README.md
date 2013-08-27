@@ -1,21 +1,23 @@
 # Primus Live
 
-This is a simple development setup for Node.js apps, with minimal dependencies
-on other packages and maximal freedom to organise the application source files:
+This is a simple development setup for Node.js apps, with minimal dependency
+on other packages and maximal freedom to organise the app's source files:
 
 * uses [Primus][P] to manage a WebSocket connection between server and client
 * uses [node-static][N] to serve all static files in the `app/` folder
 * can compile [Jade][J] (.jade) and [MarkDown][M] (.md) files to HMTL (.html)
 * can compile [Stylus][S] (.styl) files to CSS (.css)
 * can compile [CoffeeScript][C] (.coffee) files to JavaScript (.js)
-* the clients do not notice this, they just fetch .html, .css, and .js files
+* clients do not care about this, they just fetch .html, .css, and .js files
 * the server tells each client to reload or refresh CSS when a file changes
+* supports optional `services` module to include custom server-side logic
 * automatic WebSocket reconnect with back-off (handled by Primus)
 
 ## Example
 
 The example illustrates how to use this with frameworks such as [AngularJS][A]
-and [Foundation CSS][F], and uses [Bower][B] to manage these code dependencies:
+and [Foundation CSS][F], and uses [Bower][B] to manage these code dependencies.
+This uses Jade, but `app/index.html` would also work:
 
 ### app/index.jade
 
@@ -27,7 +29,7 @@ html(lang='en')
     style [ng-cloak] { display: none; }
     script(src='/primus/primus.js')
     script.
-      ... // include the angular and script loaders here for async loading
+      ... // include angular and script loaders here for async loading
       $script([
         '/reload/reload.js',
         '/angular/angular.js',
