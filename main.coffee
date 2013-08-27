@@ -11,26 +11,53 @@ marked = require 'marked'
 {Server} = require 'node-static'
 Primus = require 'primus'
 
-file = new Server './app'
+appFiles = new Server './app'
+moreFiles = new Server './bower_components'
 
-server = http.createServer (req, res) ->
+server = http.createServer (request, response) ->
 
-  sendResult = (mime, data) ->
-    res.writeHead 200,
+  setResponse = (mime, data) ->
+    response.writeHead 200,
       'Content-Type': mime
       'Content-Length': Buffer.byteLength data
-    res.end data
+    response.end data
 
-  fail = (err) ->
-    res.writeHead err.status, err.headers
-    res.end err.message
+  serveStaticOrCompiled = (files, fail) ->
+    files.serve request, response, (err) ->
+      if err
+        dest = files.root + request.uri.pathname
+        dest += '/index.html'  if dest.substr(-1) is '/'
+        src = data = undefined
 
-  req.resume()
-  req.on 'end', ->
-    # if req.uri.pathname is '/primus/primus.js'
-    #   return sendResult 'application/javascript', primus.library()
-    if req.uri.pathname is '/reload/reload.js'
-      return sendResult 'application/javascript', coffee.compile '''
+        canTransform = (suffix, extensions...) ->
+          if path.extname(dest) is suffix
+            for ext in extensions
+              src = dest.replace(suffix,'') + ext
+              try
+                return data = fs.readFileSync src, encoding: 'utf8'
+          false
+
+        switch
+          when canTransform '.html', '.jade'
+            setResponse 'text/html', do jade.compile data, { filename: src }
+          when canTransform '.html', '.md'
+            setResponse 'text/html', marked data
+          when canTransform '.js', '.coffee', '.coffee.md', '.litcoffee'
+            setResponse 'application/javascript', coffee.compile data
+          when canTransform '.css', '.styl'
+            stylus.render data, { filename: src }, (err, css) ->
+              if err
+                console.warn 'stylus error', err
+                fail err
+              else
+                setResponse 'text/css', css
+          else
+            fail err
+
+  request.resume()
+  request.on 'end', ->
+    if request.uri.pathname is '/reload/reload.js'
+      return setResponse 'application/javascript', coffee.compile '''
         window.primus = new Primus
         primus.on 'data', (data) ->
           if data is true
@@ -40,44 +67,17 @@ server = http.createServer (req, res) ->
               if e.href and /stylesheet/i.test e.rel
                 e.href = "#{e.href.replace /\\?.*/, ''}?#{Date.now()}"
       '''
-
-    file.serve req, res, (err) ->
-      if err
-        dest = file.root + req.uri.pathname
-        dest += '/index.html'  if dest.substr(-1) is '/'
-        src = data = undefined
-
-        canTransform = (suffix, extensions...) ->
-          if path.extname(dest) is suffix
-            for ext in extensions
-              src = dest.replace(suffix,'') + ext
-              try
-                data = fs.readFileSync src, encoding: 'utf8'
-                return true
-
-        switch
-          when canTransform '.html', '.jade'
-            sendResult 'text/html', do jade.compile data, { filename: src }
-          when canTransform '.html', '.md'
-            sendResult 'text/html', marked data
-          when canTransform '.js', '.coffee', '.coffee.md', '.litcoffee'
-            sendResult 'application/javascript', coffee.compile data
-          when canTransform '.css', '.styl'
-            stylus.render data, { filename: src }, (err, css) ->
-              if err
-                console.log 'stylus error', err
-                fail err
-              else
-                sendResult 'text/css', css
-          else
-            fail err
+    serveStaticOrCompiled appFiles, (err) ->
+      serveStaticOrCompiled moreFiles, (err) ->
+        response.writeHead err.status, err.headers
+        response.end err.message
 
 primus = new Primus server, transformer: 'engine.io'
 
 primus.on 'connection', (socket) ->
-  console.log 'new connection'
+  console.info 'new connection', new Date
   socket.on 'data', (msg) ->
-    console.log 'msg', msg
+    console.info 'msg', msg
     primus.write ping: msg # broadcast (use socket.write for single reply)
 
 # recursive directory watcher, FIXME: directories added later don't get watched
@@ -90,9 +90,9 @@ watch = (path, cb) ->
           unless err
             watch "#{path}/#{f}", cb  for f in files
 
-watch file.root, (event, path) ->
+watch appFiles.root, (event, path) ->
   reload = not /\.(css|styl)$/.test path
-  console.log 'reload:', reload, '-', event, path
+  console.info 'reload:', reload, '-', event, path
   primus.write reload  # broadcast true or false
 
 server.listen 8080
