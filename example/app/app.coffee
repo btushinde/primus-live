@@ -1,4 +1,4 @@
-ng = angular.module "myApp", []
+ng = angular.module "myApp", ['ngRoute']
   
 ng.config [
   "$routeProvider",

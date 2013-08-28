@@ -20,8 +20,9 @@ html(lang='en')
       $script([
         '/reload/reload.js',
         '/angular/angular.js',
+        '/angular-route/angular-route.js',
         '/app.js'
-      ], function() {
+      ], function(err) {
         // when all is done, execute bootstrap angular application
         angular.bootstrap(document, ['myApp']);
       });
