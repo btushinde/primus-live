@@ -8,7 +8,6 @@ verbose =
   client: (primus) ->
     # only report the first error, but do it very disruptively!
     primus.once 'error', alert
-    # primus.on 'data', (arg) -> console.log 'data', arg
 
 tick =
   server: (primus) ->
