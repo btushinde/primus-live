@@ -44,9 +44,11 @@ html(lang='en')
           li.myNav
             a(href='#/view2') view2
 
-    div.row
-      div.small-12.large-12.columns(ng-view)
+    .row
+      .small-12.large-12.columns(ng-view)
 
-    div.secondary.label
+    .secondary.label
       | Angular seed app: v
       span(app-version)
+    .label Connection: {{ serverConnection }}
+    .secondary.label {{ serverTick || "?" }}

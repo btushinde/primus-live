@@ -7,3 +7,7 @@ module.exports = (primus) ->
   ['connection', 'disconnection', 'initialised'].forEach (type) ->
     primus.on type, (socket) ->
       console.info "primus (#{type})", new Date
+
+  setInterval ->
+    primus.write Date.now()
+  , 1000
