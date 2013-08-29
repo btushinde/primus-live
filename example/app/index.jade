@@ -19,7 +19,7 @@ html(lang='en')
       // load all of the dependencies asynchronously.
       $script([
         '/angular/angular.js',
-        '/angular-route/angular-route.js',
+        '/angular-ui-router/release/angular-ui-router.js',
         '/app.js'
       ], function(err) {
         // when all is done, set up Primus and execute angular bootstrap
@@ -45,7 +45,7 @@ html(lang='en')
             a(href='#/view2') view2
 
     .row
-      .small-12.large-12.columns(ng-view)
+      .small-12.large-12.columns(ui-view)
 
     .secondary.label
       | Angular seed app: v
