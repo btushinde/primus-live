@@ -71,11 +71,10 @@ server = http.createServer (request, response) ->
         response.writeHead err.status, err.headers
         response.end err.message
 
-primus = new Primus server, transformer: 'engine.io'
+try # silently ignore missing plugins
+  plugins = require "#{process.cwd()}/plugins"
 
-try # silently ignore a missing module
-  services = require "#{process.cwd()}/services"
-services? primus
+primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
 
 # recursive directory watcher, FIXME: directories added later don't get watched
 watch = (path, cb) ->

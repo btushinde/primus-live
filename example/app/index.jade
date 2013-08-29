@@ -51,4 +51,4 @@ html(lang='en')
       | Angular seed app: v
       span(app-version)
     .label Connection: {{ serverConnection }}
-    .secondary.label {{ serverTick || "?" }}
+    .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
