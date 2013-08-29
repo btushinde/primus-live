@@ -1,12 +1,12 @@
 ng = angular.module 'myApp', ['ui.state', 'primus']
   
 ng.config [
-  '$stateProvider', '$urlRouterProvider',
-  ($stateProvider, $urlRouterProvider) ->
-    $urlRouterProvider.otherwise '/view1'
+  '$stateProvider', '$urlRouterProvider', '$locationProvider',
+  ($stateProvider, $urlRouterProvider, $locationProvider) ->
+    $urlRouterProvider.otherwise '/'
 
     $stateProvider.state 'view1',
-      url: '/view1',
+      url: '/',
       templateUrl: 'partial1.html'
       controller: 'MyCtrl1'
 
@@ -14,6 +14,8 @@ ng.config [
       url: '/view2',
       templateUrl: 'partial2.html'
       controller: 'MyCtrl2'
+
+    $locationProvider.html5Mode true
 ]
 
 ng.controller 'MyCtrl1', [
