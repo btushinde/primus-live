@@ -1,9 +1,8 @@
 ng = angular.module 'myApp', ['ui.state', 'primus']
   
 ng.config [
-  '$stateProvider', '$urlRouterProvider', '$locationProvider',
-  ($stateProvider, $urlRouterProvider, $locationProvider) ->
-    $locationProvider.html5Mode true
+  '$stateProvider', '$urlRouterProvider',
+  ($stateProvider, $urlRouterProvider) ->
     $urlRouterProvider.otherwise '/'
 
     $stateProvider

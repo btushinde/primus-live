@@ -8,63 +8,58 @@ jade = require 'jade'
 stylus = require 'stylus'
 coffee = require 'coffee-script'
 marked = require 'marked'
-{Server} = require 'node-static'
+connect = require 'connect'
 Primus = require 'primus'
 
-appFiles = new Server './app'
-moreFiles = new Server './bower_components'
+APP_DIR = './app'
 
-server = http.createServer (request, response) ->
+serveCompiled = (root) ->
+  (req, res, next) ->
 
-  setResponse = (mime, data) ->
-    bytes = Buffer.byteLength data
-    response.writeHead 200, 'Content-Type': mime, 'Content-Length': bytes
-    response.end data
+    setResponse = (mime, data) ->
+      bytes = Buffer.byteLength data
+      res.writeHead 200, 'Content-Type': mime, 'Content-Length': bytes
+      res.end data
 
-  serveStaticOrCompiled = (files, fail) ->
-    files.serve request, response, (err) ->
-      if err
-        dest = files.root + request.uri.pathname
-        dest += '/index.html'  if dest.substr(-1) is '/'
-        src = data = undefined
+    dest = root + req.uri.pathname
+    dest += '/index.html'  if dest.substr(-1) is '/'
+    src = data = undefined
 
-        canCompile = (suffix, extensions...) ->
-          if path.extname(dest) is suffix
-            for ext in extensions
-              src = dest.replace(suffix,'') + ext
-              try
-                return data = fs.readFileSync src, encoding: 'utf8'
-          false
+    canCompile = (suffix, extensions...) ->
+      if path.extname(dest) is suffix
+        for ext in extensions
+          src = dest.replace(suffix,'') + ext
+          try
+            return data = fs.readFileSync src, encoding: 'utf8'
+      false
 
-        switch
-          when canCompile '.html', '.jade'
-            setResponse 'text/html',
-              do jade.compile data, filename: src
-          when canCompile '.html', '.md'
-            setResponse 'text/html',
-              marked data
-          when canCompile '.js', '.coffee'
-            setResponse 'application/javascript',
-              coffee.compile data
-          when canCompile '.js', '.coffee.md', '.litcoffee'
-            setResponse 'application/javascript',
-              coffee.compile data, literate: true
-          when canCompile '.css', '.styl'
-            stylus.render data, filename: src, (e, css) ->
-              if e
-                console.warn 'stylus error', e.message
-                fail err
-              else
-                setResponse 'text/css', css
-          else
-            fail err
+    switch
+      when canCompile '.html', '.jade'
+        setResponse 'text/html',
+          do jade.compile data, filename: src
+      when canCompile '.html', '.md'
+        setResponse 'text/html',
+          marked data
+      when canCompile '.js', '.coffee'
+        setResponse 'application/javascript',
+          coffee.compile data
+      when canCompile '.js', '.coffee.md', '.litcoffee'
+        setResponse 'application/javascript',
+          coffee.compile data, literate: true
+      when canCompile '.css', '.styl'
+        stylus.render data, filename: src, (err, css) ->
+          throw err  if err
+          setResponse 'text/css', css
+      else
+        next()
 
-  request.resume()
-  request.on 'end', ->
-    serveStaticOrCompiled appFiles, (err) ->
-      serveStaticOrCompiled moreFiles, (err) ->
-        response.writeHead err.status, err.headers
-        response.end err.message
+app = connect()
+app.use connect.logger 'dev'
+app.use connect.staticCache()
+app.use connect.static APP_DIR
+app.use connect.static './bower_components'
+app.use serveCompiled APP_DIR
+app.use connect.errorHandler()
 
 watchDir = (path, cb) -> # recursive directory watcher
   fs.stat path, (err, stats) ->
@@ -77,10 +72,12 @@ watchDir = (path, cb) -> # recursive directory watcher
 try # silently ignore missing plugins
   plugins = require "#{process.cwd()}/plugins"
 
+server = http.createServer app
 primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
+
 primus.use 'live',
   server: (primus) ->
-    watchDir appFiles.root, (event, path) ->
+    watchDir APP_DIR, (event, path) ->
       reload = not /\.(css|styl)$/.test path
       console.info 'reload:', reload, '-', event, path
       primus.write reload  # broadcast true or false

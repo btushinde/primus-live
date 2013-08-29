@@ -27,11 +27,12 @@ html(lang='en')
   head
     meta(charset='utf-8')
     style [ng-cloak] { display: none; }
-    script(src='/primus/primus.js')
     script.
       ... // include angular and script loaders here for async loading
       $script([
+        '/primus/primus.js',
         '/angular/angular.js',
+        '/angular-ui-router/release/angular-ui-router.js',
         '/app.js',
       ], function() {
         new Primus();
@@ -72,9 +73,9 @@ up Primus [plugins][G] - works for both server- and (simple) client-side hooks.
 To customise, make a copy of the `example/` folder next to it and change things
 there, so that updates of this code won't get in your way.
 
-Load `primus.js` and then do a `new Primus();` on each page to keep a real-time
-bi-directional WebSocket connection open, including automatic live-reload.
-This is is particularly easy to do with single-page applications.
+Load `primus.js` followed by a `new Primus();` on each page load to keep a
+real-time bi-directional WebSocket connection open, including the automatic
+live-reload. This is is particularly easy to do with single-page applications.
 
 Live-reload is implemented by sending `true` or `false` over the WebSocket
 (as JSON). These two values should be ignored in your own code when listening
