@@ -66,15 +66,13 @@ server = http.createServer (request, response) ->
         response.writeHead err.status, err.headers
         response.end err.message
 
-# recursive directory watcher, FIXME: directories added later don't get watched
-watch = (path, cb) ->
+watchDir = (path, cb) -> # recursive directory watcher
   fs.stat path, (err, stats) ->
-    unless err
-      if stats.isDirectory()
-        fs.watch path, cb
-        fs.readdir path, (err, files) ->
-          unless err
-            watch "#{path}/#{f}", cb  for f in files
+    if not err and stats.isDirectory()
+      fs.watch path, cb
+      fs.readdir path, (err, files) ->
+        unless err
+          watchDir "#{path}/#{f}", cb  for f in files
 
 try # silently ignore missing plugins
   plugins = require "#{process.cwd()}/plugins"
@@ -82,7 +80,7 @@ try # silently ignore missing plugins
 primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
 primus.use 'live',
   server: (primus) ->
-    watch appFiles.root, (event, path) ->
+    watchDir appFiles.root, (event, path) ->
       reload = not /\.(css|styl)$/.test path
       console.info 'reload:', reload, '-', event, path
       primus.write reload  # broadcast true or false
