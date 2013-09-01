@@ -20,12 +20,16 @@ html(lang='en')
       $script([
         '/primus/primus.js',
         '/angular/angular.js',
-        '/angular-ui-router/release/angular-ui-router.js',
         '/app.js'
       ], function(err) {
         // when all is done, set up Primus and execute angular bootstrap
         primus = new Primus();
-        angular.bootstrap(document, ['myApp']);
+        $script([
+          // for some reason, angular-ui needs the rest of angular pre-loaded
+          '/angular-ui-router/release/angular-ui-router.js'
+        ], function(err) {
+          angular.bootstrap(document, ['myApp']);
+        });
       });
     title Primus Live with AngularJS and Foundation
     link(rel='stylesheet',href='/normalize-css/normalize.css')
