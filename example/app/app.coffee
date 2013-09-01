@@ -1,4 +1,4 @@
-ng = angular.module 'myApp', ['ui.state', 'primus', 'admin']
+ng = angular.module 'myApp', ['ui.state', 'ng-primus', 'admin']
   
 ng.config [
   '$stateProvider', '$urlRouterProvider',
