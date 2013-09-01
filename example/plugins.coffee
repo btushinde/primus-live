@@ -36,9 +36,9 @@ for name in fs.readdirSync './app'
   if fs.statSync(pluginPath).isDirectory()
     info = {}
     try
-      info.server = require pluginPath + '/plugin'
+      info.server = require pluginPath + '/server'
     for ext in ['.js', '.coffee', '.coffee.md', '.litcoffee']
-      modulePath = pluginPath + '/module' + ext
+      modulePath = pluginPath + '/client' + ext
       try
         info.library = fs.readFileSync modulePath, 'utf8'
       if info.library
