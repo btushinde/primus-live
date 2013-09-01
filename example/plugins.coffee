@@ -3,7 +3,9 @@
 coffee = require 'coffee-script'
 fs = require 'fs'
 
-verbose =
+plugins = {}
+
+plugins.verbose =
   server: (primus) ->
     ['connection', 'disconnection', 'initialised'].forEach (type) ->
       primus.on type, (socket) ->
@@ -12,7 +14,7 @@ verbose =
     # only report the first error, but do it very disruptively!
     primus.once 'error', alert
 
-tick =
+plugins.tick =
   server: (primus) ->
     setInterval ->
       primus.write Date.now()
@@ -22,7 +24,7 @@ tick =
       if typeof packet.data is 'number'
         console.log 'tick', packet.data
 
-angular =
+plugins.angular =
 
   server: (primus) ->
     primus.on 'connection', (spark) ->
@@ -64,9 +66,34 @@ angular =
                 $rootScope.$broadcast 'server', arg
     ]
 
-admin =
-  server: require './app/admin/plugin'
-  client: (primus) ->
-  library: coffee.compile fs.readFileSync './app/admin/module.coffee', 'utf8'
+# example plugin object, as needed by Primus:
+#
+# admin =
+#   server: require './app/admin/plugin'
+#   client: (primus) ->
+#   library: coffee.compile fs.readFileSync './app/admin/module.coffee', 'utf8'
 
-module.exports = { verbose, tick, angular, admin }
+for name in fs.readdirSync './app'
+  pluginPath = './app/' + name
+  if fs.statSync(pluginPath).isDirectory()
+    info = {}
+    try
+      info.server = require pluginPath + '/plugin'
+    for ext in ['.js', '.coffee', '.coffee.md', '.litcoffee']
+      modulePath = pluginPath + '/module' + ext
+      try
+        info.library = fs.readFileSync modulePath, 'utf8'
+      if info.library
+        unless ext is '.js'
+          info.library = coffee.compile info.library,
+            filename: modulePath
+            literate: ext isnt '.coffee'
+        info.client = (primus) ->
+          # dummy function, needed by Primus to include the library code
+        break
+    if info.server or info.client
+      plugins[name] = info
+
+console.log 'plugins', Object.keys plugins
+
+module.exports = plugins
