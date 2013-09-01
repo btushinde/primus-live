@@ -84,11 +84,11 @@ primus.use 'live',
       primus.write reload  # broadcast true or false
       if /\.(js|coffee|coffee\.md|litcoffee)$/.test path
         console.info 'exit due to code change:', path
-        # TODO: this delay hack is needed to get the reload message(s) sent out
-        setTimeout process.exit, 10
+        process.exit 0
   client: (primus) ->
     primus.on 'data', (data) ->
       if data is true
+        # TODO: delay hack is needed in case the server had to restart a worker
         setTimeout (-> window.location.reload true), 500
       else if data is false
         for e in document.getElementsByTagName 'link'
