@@ -1,4 +1,7 @@
-# Plugins for Primus, used on both sides of the connection
+# Extension plugins for Primus, used on both sides of the connection
+
+coffee = require 'coffee-script'
+fs = require 'fs'
 
 verbose =
   server: (primus) ->
@@ -13,13 +16,25 @@ tick =
   server: (primus) ->
     setInterval ->
       primus.write Date.now()
-    , 1000
+    , 5000
   client: (primus) ->
     primus.transform 'incoming', (packet) ->
       if typeof packet.data is 'number'
         console.log 'tick', packet.data
 
 angular =
+
+  server: (primus) ->
+    primus.on 'connection', (spark) ->
+      spark.on 'data', (arg) ->
+        switch
+          when arg.constructor is String
+            console.info 'primus', spark.id, ':', arg
+          when Array.isArray arg
+            primus.emit arg...
+          when arg instanceof Object
+            primus.emit 'client', spark, arg
+
   client: (primus) ->
     # define an Angular module which injects incoming events The Angular Way
     # this module must be added as dependency in the main Angular application
@@ -49,4 +64,9 @@ angular =
                 $rootScope.$broadcast 'server', arg
     ]
 
-module.exports = { verbose, tick, angular }
+admin =
+  server: require './app/admin/plugin'
+  client: (primus) ->
+  library: coffee.compile fs.readFileSync './app/admin/module.coffee', 'utf8'
+
+module.exports = { verbose, tick, angular, admin }

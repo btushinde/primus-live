@@ -55,7 +55,6 @@ serveCompiled = (root) ->
 
 app = connect()
 app.use connect.logger 'dev'
-app.use connect.staticCache()
 app.use connect.static APP_DIR
 app.use connect.static './bower_components'
 app.use serveCompiled APP_DIR
@@ -71,6 +70,8 @@ watchDir = (path, cb) -> # recursive directory watcher
 
 try # silently ignore missing plugins
   plugins = require "#{process.cwd()}/plugins"
+catch err
+  throw err  unless err.code is 'MODULE_NOT_FOUND'
 
 server = http.createServer app
 primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
