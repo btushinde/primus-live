@@ -91,7 +91,8 @@ this happens _before_ the Primus instance gets created in `app/app.js`).
 ## Your own app
 
 To customise, make a copy of the `example/` folder next to it and change things
-there, so that updates of this code won't get in your way.
+there, so that updates of this code won't get in your way. If you name your
+folder "my-_something_", it will be ignored by git.
 
 Load `primus.js` followed by a `new Primus();` on each page load to keep a
 real-time bi-directional WebSocket connection open, including the automatic
