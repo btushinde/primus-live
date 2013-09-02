@@ -16,8 +16,8 @@ on other packages and maximal freedom to organise the app's source files:
 
 ## Example
 
-This minimal example connects and reports tick events from the server.  This
-uses Jade, Stylus, and CoffeeScript, but HTML, CSS, and JavaScript also work:
+This minimal example connects and reports tick events from the server. This uses
+Jade, Stylus, and CoffeeScript, but HTML, CSS, and JavaScript would also work:
 
 ### app/index.jade
 
@@ -92,7 +92,7 @@ this happens _before_ the Primus instance gets created in `app/app.js`).
 
 To customise, make a copy of the `example/` folder next to it and change things
 there, so that updates of this code won't get in your way. If you name your
-folder "my-_something_", it will be ignored by git.
+folder "my-...", it will be ignored by git.
 
 Load `primus.js` followed by a `new Primus();` on each page load to keep a
 real-time bi-directional WebSocket connection open, including the automatic
