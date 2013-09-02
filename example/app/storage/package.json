@@ -1,0 +1,15 @@
+{
+  "name": "storage",
+  "version": "0.0.0",
+  "description": "example",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "repository": {},
+  "dependencies": {
+    "level": "~0.15.0"
+  }
+}

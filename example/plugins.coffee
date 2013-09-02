@@ -7,7 +7,7 @@ plugins = {}
 
 plugins.verbose =
   server: (primus) ->
-    ['connection', 'disconnection', 'initialised'].forEach (type) ->
+    ['connection', 'disconnection', 'initialised', 'close'].forEach (type) ->
       primus.on type, (socket) ->
         console.info "primus (#{type})", new Date
   client: (primus) ->
@@ -52,6 +52,6 @@ for name in fs.readdirSync './app'
     if info.server or info.client
       plugins[name] = info
 
-console.log 'plugins', Object.keys plugins
+console.log "plugins: #{Object.keys(plugins)}"
 
 module.exports = plugins
