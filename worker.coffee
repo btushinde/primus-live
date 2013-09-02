@@ -68,13 +68,9 @@ watchDir = (path, cb) -> # recursive directory watcher
         unless err
           watchDir "#{path}/#{f}", cb  for f in files
 
-try # silently ignore missing plugins
-  plugins = require "#{process.cwd()}/plugins"
-catch err
-  throw err  unless err.code is 'MODULE_NOT_FOUND'
-
+plugins = require './plugins'
 server = http.createServer app
-primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
+primus = new Primus server, transformer: 'engine.io', plugin: plugins
 
 primus.use 'live',
   server: (primus) ->

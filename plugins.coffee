@@ -32,7 +32,7 @@ plugins.tick =
 #   library: coffee.compile fs.readFileSync './app/admin/module.coffee', 'utf8'
 
 for name in fs.readdirSync './app'
-  pluginPath = './app/' + name
+  pluginPath = process.cwd() + '/app/' + name
   if fs.statSync(pluginPath).isDirectory()
     info = {}
     try

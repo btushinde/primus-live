@@ -3,7 +3,7 @@
 
 cluster = require 'cluster'
 
-cluster.setupMaster exec: __dirname + '/main.coffee'
+cluster.setupMaster exec: __dirname + '/worker.coffee'
 
 cluster.on 'exit', (worker, code, signal) ->
   exitCode = worker.process.exitCode
