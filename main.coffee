@@ -78,18 +78,28 @@ primus = new Primus server, transformer: 'engine.io', plugin: plugins ? {}
 
 primus.use 'live',
   server: (primus) ->
+    # This is special logic to force a reload of each client when the server
+    # comes back up after a restart due to code changes. We only want this to
+    # happen for exisiting clients - new clients should not start off with a
+    # refresh. Note the "once" setup, else we'd get an infinite reload loop.
+    startup = (spark) -> primus.write true
+    primus.once 'connection', startup
+    setTimeout ->
+      primus.removeListener 'connection', startup
+    , 3000
+
     watchDir APP_DIR, (event, path) ->
+      if /\.(js|coffee|coffee\.md|litcoffee)$/.test path
+        console.info 'exit due to code change:', path
+        return process.exit 0
       reload = not /\.(css|styl)$/.test path
       console.info 'reload:', reload, '-', event, path
       primus.write reload  # broadcast true or false
-      if /\.(js|coffee|coffee\.md|litcoffee)$/.test path
-        console.info 'exit due to code change:', path
-        process.exit 0
+
   client: (primus) ->
     primus.on 'data', (data) ->
       if data is true
-        # TODO: delay hack is needed in case the server had to restart a worker
-        setTimeout (-> window.location.reload true), 500
+        window.location.reload true
       else if data is false
         for e in document.getElementsByTagName 'link'
           if e.href and /stylesheet/i.test e.rel
