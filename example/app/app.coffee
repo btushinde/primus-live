@@ -1,20 +1,7 @@
-ng = angular.module 'myApp', [
-  'ui.state'
-  'ng-primus'
-  'admin'
-  'view1'
-  'view2'
-]
-  
-ng.config [
-  '$stateProvider', '$urlRouterProvider',
-  ($stateProvider, $urlRouterProvider) ->
-    $urlRouterProvider.otherwise '/'
-]
+# make Primus object global for console debugging
+window.primus = new Primus
 
-ng.directive 'appVersion', [
-  'version',
-  (version) ->
-    (scope, elm, attrs) ->
-      elm.text version
-]
+primus.on 'data', (data) ->
+  if typeof data is 'number'
+    el = document.getElementById 'tick'
+    el.innerHTML = new Date(data)

@@ -78,11 +78,11 @@ primus.use 'live',
     # comes back up after a restart due to code changes. We only want this to
     # happen for exisiting clients - new clients should not start off with a
     # refresh. Note the "once" setup, else we'd get an infinite reload loop.
-    startup = (spark) -> primus.write true
-    primus.once 'connection', startup
+    forceReload = (spark) -> primus.write true
+    primus.once 'connection', forceReload
     setTimeout ->
-      primus.removeListener 'connection', startup
-    , 3000
+      primus.removeListener 'connection', forceReload
+    , 3000 # new clients connecting after 3s no longer get a reload signal
 
     watchDir APP_DIR, (event, path) ->
       if /\.(js|coffee|coffee\.md|litcoffee)$/.test path

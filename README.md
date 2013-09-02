@@ -16,9 +16,8 @@ on other packages and maximal freedom to organise the app's source files:
 
 ## Example
 
-The example illustrates how to use this with frameworks such as [AngularJS][A]
-and [Foundation CSS][F], and uses [Bower][B] to manage these code dependencies.
-This uses Jade, but `app/index.html` would also work:
+This minimal example connects and reports tick events from the server.  This
+uses Jade, Stylus, and CoffeeScript, but HTML, CSS, and JavaScript also work:
 
 ### app/index.jade
 
@@ -27,23 +26,35 @@ This uses Jade, but `app/index.html` would also work:
 html(lang='en')
   head
     meta(charset='utf-8')
-    style [ng-cloak] { display: none; }
-    script.
-      ... // include angular and script loaders here for async loading
-      $script([
-        '/primus/primus.js',
-        '/angular/angular.js',
-        '/app.js',
-      ], function() {
-        new Primus();
-        angular.bootstrap(document, ['myApp']);
-      });
-    title ...
-    link(rel='stylesheet',href='/normalize-css/normalize.css')
-    link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
+    script(src='/primus/primus.js')
+    script(src='/app.js')
+
+    title Primus Live Example
     link(rel='stylesheet',href='/style.css')
-  body(ng-cloak)
-    ...
+
+  body
+    p
+      | Server time is: 
+      span#tick ?
+```
+
+### app/style.css
+
+```stylus
+body
+  margin 50px
+```
+
+### app/app.coffee
+
+```coffee
+# make Primus object global for console debugging
+window.primus = new Primus
+
+primus.on 'data', (data) ->
+  if typeof data is 'number'
+    el = document.getElementById 'tick'
+    el.innerHTML = new Date(data)
 ```
 
 ## Startup
@@ -52,7 +63,6 @@ Launch the server as follows and then go to <http://localhost:8080/>:
 
 ```
   cd example
-  bower install
   node ..
 ```
 
@@ -71,6 +81,12 @@ If there are subdirectories in './app', these will be used to define additional
 plugins. Put server side code in a file named 'server.coffee' (or .js), and put
 client-side code in a file called 'client.coffee' and things will automatically
 get picked up, i.e. launched on the server and/or sent and run on the clients.
+
+The server-side code must export a single function taking `primus` as single
+argument, because that's how Primus expects server-side plugins to be.
+
+The client-side code can be anything, it is sent over and run as is (note that
+this happens _before_ the Primus instance gets created in `app/app.js`).
 
 ## Your own app
 

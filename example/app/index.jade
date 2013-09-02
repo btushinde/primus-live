@@ -2,61 +2,14 @@
 html(lang='en')
   head
     meta(charset='utf-8')
-    style [ng-cloak] { display: none; }
-    // script(src='/primus/primus.js')
-    script.
-      // include angular loader, which allows the files to load in any order
-      // AngularJS v1.2.0rc1
-      // (c) 2010-2012 Google, Inc. http://angularjs.org
-      // License: MIT
-      (function(k){'use strict';function d(c,b,e){return c[b]||(c[b]=e())}return d(d(k,"angular",Object),"module",function(){var c={};return function(b,e,f){e&&c.hasOwnProperty(b)&&(c[b]=null);return d(c,b,function(){function a(a,b,d){return function(){c[d||"push"]([a,b,arguments]);return g}}if(!e)throw minErr("$injector")("nomod",b);var c=[],d=[],h=a("$injector","invoke"),g={_invokeQueue:c,_runBlocks:d,requires:e,name:b,provider:a("$provide","provider"),factory:a("$provide","factory"),service:a("$provide",
-      "service"),value:a("$provide","value"),constant:a("$provide","constant","unshift"),animation:a("$animateProvider","register"),filter:a("$filterProvider","register"),controller:a("$controllerProvider","register"),directive:a("$compileProvider","directive"),config:h,run:function(a){d.push(a);return this}};f&&h(f);return g})}})})(window);
-      // $script.js v2.4.0 - Async loader & dependency manager
-      // https://github.com/ded/script.js
-      // (c) Dustin Diaz 2013
-      // License: MIT
-      (function(e,t,n){typeof module!="undefined"&&module.exports?module.exports=n():typeof define=="function"&&define.amd?define(n):t[e]=n()})("$script",this,function(){function v(e,t){for(var n=0,r=e.length;n<r;++n)if(!t(e[n]))return f;return 1}function m(e,t){v(e,function(e){return!t(e)})}function g(e,t,a){function d(e){return e.call?e():r[e]}function b(){if(!--p){r[h]=1,c&&c();for(var e in s)v(e.split("|"),d)&&!m(s[e],d)&&(s[e]=[])}}e=e[l]?e:[e];var f=t&&t.call,c=f?t:a,h=f?e.join(""):t,p=e.length;return setTimeout(function(){m(e,function(e){if(e===null)return b();if(u[e])return h&&(i[h]=1),u[e]==2&&b();u[e]=1,h&&(i[h]=1),y(!n.test(e)&&o?o+e+".js":e,b)})},0),g}function y(n,r){var i=e.createElement("script"),s=f;i.onload=i.onerror=i[d]=function(){if(i[h]&&!/^c|loade/.test(i[h])||s)return;i.onload=i[d]=null,s=1,u[n]=2,r()},i.async=1,i.src=n,t.insertBefore(i,t.firstChild)}var e=document,t=e.getElementsByTagName("head")[0],n=/^https?:\/\//,r={},i={},s={},o,u={},a="string",f=!1,l="push",c="DOMContentLoaded",h="readyState",p="addEventListener",d="onreadystatechange";return!e[h]&&e[p]&&(e[p](c,function b(){e.removeEventListener(c,b,f),e[h]="complete"},f),e[h]="loading"),g.get=y,g.order=function(e,t,n){(function r(i){i=e.shift(),e.length?g(i,r):g(i,t,n)})()},g.path=function(e){o=e},g.ready=function(e,t,n){e=e[l]?e:[e];var i=[];return!m(e,function(e){r[e]||i[l](e)})&&v(e,function(e){return r[e]})?t():!function(e){s[e]=s[e]||[],s[e][l](t),n&&n(i)}(e.join("|")),g},g.done=function(e){g([null],e)},g})
-      // load all of the dependencies asynchronously.
-      $script([
-        '/primus/primus.js',
-        '/angular/angular.js',
-        '/app.js'
-      ], function(err) {
-        // when all is done, set up Primus and execute angular bootstrap
-        primus = new Primus();
-        $script([
-          // for some reason, angular-ui needs the rest of angular pre-loaded
-          '/angular-ui-router/release/angular-ui-router.js'
-        ], function(err) {
-          angular.bootstrap(document, ['myApp']);
-        });
-      });
-    title Primus Live with AngularJS and Foundation
-    link(rel='stylesheet',href='/normalize-css/normalize.css')
-    link(rel='stylesheet',href='/bower-foundation-css/foundation.css')
+    script(src='/primus/primus.js')
+    script(src='/app.js')
+
+    title Primus Live Example
     link(rel='stylesheet',href='/style.css')
 
-  body(ng-cloak)
-    nav.top-bar
-      ul.title-area
-        li.name
-          h1
-            a(href='#') Primus Live
-      section.top-bar-section
-        ul.left
-          li.myNav
-            a(href='#/') view1
-          li.myNav
-            a(href='#/view2') view2
-        ul.right
-          li.myNav
-            a(href='#/admin') Admin
-
-    .row
-      .small-12.large-12.columns(ui-view)
-
-    .secondary.label
-      | Angular seed app: v
-      span(app-version)
-    .label Connection: {{ serverConnection }}
-    .secondary.label @ {{ serverTick | date:'HH:mm:ss' }}
+  body
+    h1 Primus Live Example
+    p
+      | The server time is: 
+      i#tick ?
