@@ -1,8 +1,0 @@
-{
-  "name": "primus-live-app",
-  "dependencies": {
-    "angular": "~1.2.0-rc.1",
-    "angular-ui-router": "*",
-    "bower-foundation-css": "*"
-  }
-}
