@@ -4,4 +4,4 @@ window.primus = new Primus
 primus.on 'data', (data) ->
   if typeof data is 'number'
     el = document.getElementById 'tick'
-    el.innerHTML = new Date(data)
+    el.textContent = new Date(data)

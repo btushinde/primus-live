@@ -37,6 +37,8 @@ for name in fs.readdirSync './app'
     info = {}
     try
       info.server = require pluginPath + '/server'
+    catch err
+      throw err  unless err.code is 'MODULE_NOT_FOUND'
     for ext in ['.js', '.coffee', '.coffee.md', '.litcoffee']
       modulePath = pluginPath + '/client' + ext
       try
