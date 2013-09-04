@@ -14,21 +14,19 @@ Primus = require 'primus'
 APP_DIR = './app'
 
 serveCompiled = (root) ->
-  (req, res, next) ->
+  handler = (req, res, next) ->
+    dest = root + req.uri.pathname
+    src = data = undefined
 
     setResponse = (mime, data) ->
       bytes = Buffer.byteLength data
       res.writeHead 200, 'Content-Type': mime, 'Content-Length': bytes
       res.end data
 
-    dest = root + req.uri.pathname
-    dest += '/index.html'  if dest.substr(-1) is '/'
-    src = data = undefined
-
     canCompile = (suffix, extensions...) ->
       if path.extname(dest) is suffix
         for ext in extensions
-          src = dest.replace(suffix,'') + ext
+          src = dest.replace suffix, ext
           try
             return data = fs.readFileSync src, encoding: 'utf8'
       false
@@ -47,16 +45,21 @@ serveCompiled = (root) ->
         setResponse 'application/javascript',
           coffee.compile data, literate: true
       when canCompile '.css', '.styl'
-        stylus.render data, filename: src, (err, css) ->
+        stylus.render data, { filename: src }, (err, css) ->
           throw err  if err
           setResponse 'text/css', css
+      when req.uri.pathname isnt '/index.html'
+        # perform a recursive call with the top-level index page as last resort
+        # can be used to support "$locationProvider.html5Mode true" in Angular
+        # TODO: it works, but will fail when a static page is present iso .jade
+        handler { uri: { pathname: '/index.html' }}, res, next
       else
         next()
 
 app = connect()
 app.use connect.logger 'dev'
-app.use connect.static APP_DIR
-app.use connect.static './bower_components'
+app.use connect.static APP_DIR, redirect: false
+app.use connect.static './bower_components', redirect: false
 app.use serveCompiled APP_DIR
 app.use connect.errorHandler()
 
