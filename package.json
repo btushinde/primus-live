@@ -1,8 +1,8 @@
 {
   "name": "primus-live",
   "version": "0.1.1",
-  "description": "Live reload with Jade/Stylus/Coffescript/Markdown support",
-  "main": "server.js",
+  "description": "Live reload with Jade/Stylus/CoffeeScript/Markdown support",
+  "main": "index.js",
   "repository": {
     "type": "git",
     "url": "git://github.com/jcw/primus-live.git"
@@ -16,6 +16,7 @@
     "stylus": "~0.37.0",
     "coffee-script": "~1.6.3",
     "marked": "~0.2.9",
-    "connect": "~2.8.8"
+    "connect": "~2.8.8",
+    "semver": "~2.1.0"
   }
 }
