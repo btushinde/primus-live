@@ -16,7 +16,6 @@
     "stylus": "~0.37.0",
     "coffee-script": "~1.6.3",
     "marked": "~0.2.9",
-    "connect": "~2.8.8",
-    "semver": "~2.1.0"
+    "connect": "~2.8.8"
   }
 }
