@@ -1,9 +1,12 @@
 {
   "name": "primus-live",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Live reload with Jade/Stylus/Coffescript/Markdown support",
   "main": "server.js",
-  "repository": {},
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/jcw/primus-live.git"
+  },
   "author": "Jean-Claude Wippler",
   "license": "MIT",
   "dependencies": {
