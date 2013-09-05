@@ -38,7 +38,7 @@ html(lang='en')
       span#tick ?
 ```
 
-### app/style.css
+### app/style.styl
 
 ```stylus
 body
