@@ -29,7 +29,7 @@ omitExistingInDir = (dir, packages) ->
   for name, version of packages
     unless fs.existsSync path.join dir, name
       args.push name
-  args
+  args.sort()
 
 installNpmPackages = (packages, done) ->
   args = omitExistingInDir 'node_modules', packages
