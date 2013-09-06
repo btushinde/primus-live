@@ -12,25 +12,29 @@ addDependenciesTo = (results, filename) ->
     for name, version of json.dependencies or {}
       results[name] = version
 
-collectNpmPackages = (dir) ->
+collectNpmFrom = (dir) ->
   addDependenciesTo npmPackages, path.join dir, 'package.json'
 
-collectBowerPackages = (dir) ->
+collectBowerFrom = (dir) ->
   addDependenciesTo bowerPackages, path.join dir, 'bower.json'
 
-lookForPackageFiles = (dir) ->
+scanPackagesIn = (dir) ->
   for file in fs.readdirSync dir
     subdir = path.join dir, file
-    collectNpmPackages subdir
-    collectBowerPackages subdir
+    collectNpmFrom subdir
+    collectBowerFrom subdir
 
-installNpmPackages = (packages, done) ->
+omitExistingInDir = (dir, packages) ->
   args = []
   for name, version of packages
-    unless fs.existsSync path.join 'node_modules', name
+    unless fs.existsSync path.join dir, name
       args.push name
+  args
+
+installNpmPackages = (packages, done) ->
+  args = omitExistingInDir 'node_modules', packages
   if args.length
-    console.log 'npm', args
+    console.log 'npm will install:', args.join ', '
     execFile 'npm', ['install', args...], {}, (err, stdout, stderr) ->
       throw err  if err
       console.log stderr
@@ -39,12 +43,9 @@ installNpmPackages = (packages, done) ->
     process.nextTick done
 
 installBowerPackages = (packages, done) ->
-  args = []
-  for name, version of packages
-    unless fs.existsSync path.join 'bower_components', name
-      args.push name
+  args = omitExistingInDir 'bower_components', packages
   if args.length
-    console.log 'bower', args
+    console.log 'bower will install:', args.join ', '
     bower = require 'bower'
     # unless fs.existsSync 'bower.json'
     #   fs.writeFileSync 'bower.json', "#{JSON.stringify name: 'main'}\n"
@@ -61,14 +62,14 @@ npmPackages = {}
 bowerPackages = []
 
 module.exports = (done) ->
-  collectBowerPackages '.'
-  lookForPackageFiles 'app'
+  collectBowerFrom '.'
+  scanPackagesIn 'app'
 
   # if bowerPackages.length
   #   npmPackages.bower ?= '*'
 
   console.log 'npm', Object.keys npmPackages
-  console.log 'bower', bowerPackages
+  console.log 'bower', Object.keys bowerPackages
 
   installNpmPackages npmPackages, ->
     installBowerPackages bowerPackages, done
