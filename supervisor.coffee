@@ -2,6 +2,7 @@
 # -jcw, 2013-09-01
 
 cluster = require 'cluster'
+preflight = require './preflight'
 
 cluster.setupMaster exec: __dirname + '/worker.coffee'
 
@@ -16,4 +17,6 @@ startWorker = (delay) ->
     console.info 'worker', worker.process.pid, 'started'
   , delay
 
-startWorker 0
+preflight ->
+  console.log '>>> starting live server'
+  startWorker 0

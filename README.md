@@ -4,15 +4,16 @@ This is a simple development setup for Node.js apps, with minimal dependency
 on other packages and maximal freedom to organise the app's source files:
 
 * uses [Primus][P] to manage a WebSocket connection between server and client
+* automatic WebSocket reconnect with back-off (handled by Primus)
 * uses [Connect][N] to serve all static files in the `app/` folder
 * can compile [Jade][J] (.jade) and [MarkDown][M] (.md) files to HMTL (.html)
 * can compile [Stylus][S] (.styl) files to CSS (.css)
 * can compile [CoffeeScript][C] (.coffee) files to JavaScript (.js)
 * clients do not care about this, they just fetch .html, .css, and .js files
 * the server tells each client to reload HTML or refresh CSS when a file changes
-* the server also restarts _itself_ whenever a source code file changes
-* supports optional plugins to include custom server- and/or client-side logic
-* automatic WebSocket reconnect with back-off (handled by Primus)
+* the server will restart _itself_ whenever a source code file changes
+* optional plugins to include custom server- and/or client-side logic
+* auto-installs [npm][K] and [Bower][W] package dependencies in top-level folder
 
 ## Example
 
@@ -78,7 +79,7 @@ when the Primus connection object is created on the client.
 
 ## Plugins
 
-If there are subdirectories in './app', these will be used to define additional
+If there are subfolders in './app', these will be used to define additional
 plugins. Put server side code in a file named 'server.coffee' (or .js), and put
 client-side code in a file called 'client.coffee' (or .js) and it automatically
 gets picked up, i.e. launched on the server and/or sent and run on the clients.
@@ -88,6 +89,12 @@ argument, because that's how Primus expects server-side plugins to be.
 
 The client-side code can be anything, it is sent over and run as is (note that
 this happens _before_ the Primus instance gets created in `app/app.js`).
+
+If there is a `package.json` file in the plugin folder, then all dependencies
+will be installed in the top level before the live server starts running. If
+a `bower.json` file is found, then those dependencies will get installed too.
+
+Note that version numbers are not yet honoured, the latest version will be used.
 
 ## Your own app
 
@@ -114,8 +121,10 @@ MIT
 [F]: http://foundation.zurb.com/
 [G]: https://github.com/3rd-Eden/primus#plugins
 [J]: http://jade-lang.com/
+[K]: https://npmjs.org/
 [M]: http://daringfireball.net/projects/markdown/
 [N]: http://www.senchalabs.org/connect/
 [P]: https://medium.com/the-build/22af5c94a922
 [S]: http://learnboost.github.io/stylus/
+[W]: http://bower.io/
 [X]: https://github.com/3rd-Eden/primus/tree/master/example
