@@ -80,8 +80,8 @@ when the Primus connection object is created on the client.
 
 If there are subdirectories in './app', these will be used to define additional
 plugins. Put server side code in a file named 'server.coffee' (or .js), and put
-client-side code in a file called 'client.coffee' and things will automatically
-get picked up, i.e. launched on the server and/or sent and run on the clients.
+client-side code in a file called 'client.coffee' (or .js) and it automatically
+gets picked up, i.e. launched on the server and/or sent and run on the clients.
 
 The server-side code must export a single function taking `primus` as single
 argument, because that's how Primus expects server-side plugins to be.
