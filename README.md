@@ -60,7 +60,7 @@ primus.on 'data', (data) ->
 
 ## Startup
 
-Start the example server as follows and then go to <http://localhost:8080/>:
+Start the example server as follows and then go to <http://localhost:3333/>:
 
 ```
   npm install

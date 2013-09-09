@@ -104,5 +104,11 @@ primus.use 'live',
           if e.href and /stylesheet/i.test e.rel
             e.href = "#{e.href.replace /\?.*/, ''}?#{Date.now()}"
 
-server.listen 8080
-console.info 'server listening on :8080'
+try
+  launch = require process.cwd() + '/app/launch'
+catch err
+  throw err  unless err.code is 'MODULE_NOT_FOUND'
+
+unless launch? app, server, primus
+  server.listen 3333
+  console.info 'server listening on :3333'
