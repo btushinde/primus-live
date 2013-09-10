@@ -1,6 +1,6 @@
 module.exports = (app) ->
 
-  app.options.plugin.tick =
+  app.config.plugin.tick =
     server: (primus) ->
       setInterval ->
         primus.write Date.now()
@@ -9,3 +9,5 @@ module.exports = (app) ->
       primus.transform 'incoming', (packet) ->
         if typeof packet.data is 'number'
           console.log 'tick', packet.data
+
+  console.info "starting server on port :#{app.config.port}"

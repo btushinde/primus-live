@@ -72,9 +72,9 @@ app.use connect.static './bower_components', redirect: false
 app.use serveCompiled APP_DIR
 app.use connect.errorHandler()
 
-app.options = { port: 3333, transformer: 'engine.io', plugin: {} }
+app.config = { port: 3333, transformer: 'engine.io', plugin: {} }
 
-app.options.plugin.live =
+app.config.plugin.live =
   server: (primus) ->
     # This is special logic to force a reload of each client when the server
     # comes back up after a restart due to code changes. We only want this to
@@ -127,7 +127,7 @@ fs.readdirSync('./app').forEach (name) ->
     host? app, plugin
     if Object.keys(plugin).length
       plugin.client ?= -> # need some function, else Primus will complain
-      app.options.plugin[name] = plugin
+      app.config.plugin[name] = plugin
 
 try
   launch = require path.resolve('app/launch')
@@ -136,5 +136,5 @@ catch err
 launch? app
 
 server = http.createServer app
-new Primus server, app.options
-server.listen app.options.port
+new Primus server, app.config
+server.listen app.config.port

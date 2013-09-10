@@ -68,8 +68,10 @@ module.exports = (done) ->
   # if bowerPackages.length
   #   npmPackages.bower ?= '*'
 
-  console.log 'npm', Object.keys npmPackages
-  console.log 'bower', Object.keys bowerPackages
+  list = Object.keys npmPackages
+  console.log 'npm', list  if list.length
+  list = Object.keys bowerPackages
+  console.log 'bower', list  if list.length
 
   installNpmPackages npmPackages, ->
     installBowerPackages bowerPackages, done
