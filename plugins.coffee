@@ -5,24 +5,14 @@ fs = require 'fs'
 
 plugins = {}
 
-plugins.verbose =
+plugins.boot =
   server: (primus) ->
-    ['connection', 'disconnection', 'initialised', 'close'].forEach (type) ->
-      primus.on type, (socket) ->
-        console.info "primus (#{type})", new Date
+    console.log 'BOOT'
   client: (primus) ->
-    # only report the first error, but do it very disruptively!
-    primus.once 'error', alert
-
-plugins.tick =
-  server: (primus) ->
-    setInterval ->
-      primus.write Date.now()
-    , 5000
-  client: (primus) ->
-    primus.transform 'incoming', (packet) ->
-      if typeof packet.data is 'number'
-        console.log 'tick', packet.data
+    console.log 'BOOT'
+  library: coffee.compile """
+                            console.log 'LIB'
+                          """, bare: true
 
 # example plugin object, as needed by Primus:
 #
@@ -48,7 +38,10 @@ for name in fs.readdirSync './app'
           info.library = coffee.compile info.library,
             filename: modulePath
             literate: ext isnt '.coffee'
-        info.client = (primus) ->
+        info.client = coffee.compile """
+                        (primus) ->
+                          console.log 'client: #{name}'
+                      """, bare: true
           # dummy function, needed by Primus to include the library code
         break
     if info.server or info.client
