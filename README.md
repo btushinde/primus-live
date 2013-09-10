@@ -112,12 +112,27 @@ for `data` events on the `primus` object.
 
 ### app/launch.{coffee,js}
 
-If this file exists, it gets loaded just before the HTTP and Primus servers get
+If this file exists, it gets loaded just before the HTTP and Primus servers are
 created. It should define a single function taking `app` as argument, and will
 be called with the Connect `app` object. The `app.plugins` field has a list of
 all the plugins - it can be adjusted or extended before Primus does its thing.
+Keep in mind that the `client` functions will be stringified by Primus before
+use, they cannot contain any server-side variable closures.
 
 Set `app.port` to change the server port of the application (default is 3333).
+
+Set `app.transport` if you want something other than the `engine.io` default.
+
+## Standalone use
+
+The Primus Live package is not required for production use, i.e. when you don't
+want to "preflight" `npm` / `bower` installations and don't need to restart
+the server because no source code changes will be made. In this case, copy the
+`worker.coffee` file into your own project and run it as `coffee worker`.
+
+For high-end scenarios, the scripts could all be pre-compiled and served using
+a fast static file server such as `nginx`, with a dedicated WebSocket server
+to provide just the real-time side of things (this hasn't been tried yet).
 
 ## License
 
