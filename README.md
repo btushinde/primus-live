@@ -114,14 +114,14 @@ for `data` events on the `primus` object.
 
 If this file exists, it gets loaded just before the HTTP and Primus servers are
 created. It should define a single function taking `app` as argument, and will
-be called with the Connect `app` object. The `app.plugins` field has a list of
-all the plugins - it can be adjusted or extended before Primus does its thing.
+be called with the Connect `app` object. The `app.config.plugin` field contains
+all plugins found in the scan - it can be adjusted before Primus does its thing.
 Keep in mind that the `client` functions will be stringified by Primus before
 use, they cannot contain any server-side variable closures.
 
-Set `app.port` to change the server port of the application (default is 3333).
+Change `app.config.transport` to change the `engine.io` default for Primus.
 
-Set `app.transport` if you want something other than the `engine.io` default.
+Change `app.config.port` to change the server port of the app (default 3333).
 
 ## Standalone use
 

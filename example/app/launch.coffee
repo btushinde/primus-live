@@ -1,6 +1,6 @@
 module.exports = (app) ->
 
-  app.plugins.tick =
+  app.options.plugin.tick =
     server: (primus) ->
       setInterval ->
         primus.write Date.now()
