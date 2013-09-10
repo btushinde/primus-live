@@ -56,13 +56,6 @@ serveCompiled = (root) ->
       else
         next()
 
-app = connect()
-app.use connect.logger 'dev'
-app.use connect.static APP_DIR, redirect: false
-app.use connect.static './bower_components', redirect: false
-app.use serveCompiled APP_DIR
-app.use connect.errorHandler()
-
 watchDir = (path, cb) -> # recursive directory watcher
   fs.stat path, (err, stats) ->
     if not err and stats.isDirectory()
@@ -71,11 +64,25 @@ watchDir = (path, cb) -> # recursive directory watcher
         unless err
           watchDir "#{path}/#{f}", cb  for f in files
 
-plugins = require './plugins'
-server = http.createServer app
-primus = new Primus server, transformer: 'engine.io', plugin: plugins
+app = connect()
+app.use connect.logger 'dev'
+app.use connect.static APP_DIR, redirect: false
+app.use connect.static './bower_components', redirect: false
+app.use serveCompiled APP_DIR
+app.use connect.errorHandler()
 
-primus.use 'live',
+app.plugins = {}
+
+app.plugins.boot =
+  server: (primus) ->
+    console.log 'BOOT'
+  client: (primus) ->
+    console.log 'BOOT'
+  library: coffee.compile """
+                            console.log 'LIB'
+                          """, bare: true
+
+app.plugins.live =
   server: (primus) ->
     # This is special logic to force a reload of each client when the server
     # comes back up after a restart due to code changes. We only want this to
@@ -104,11 +111,48 @@ primus.use 'live',
           if e.href and /stylesheet/i.test e.rel
             e.href = "#{e.href.replace /\?.*/, ''}?#{Date.now()}"
 
+# Scan through all the app subfolders to define plugins when 'client' and/or
+# 'server' modules are found inside. Server plugins are loaded right away, but
+# their main code should be in an exported function which is called by Primus.
+fs.readdirSync('./app').forEach (name) ->
+  pluginPath = process.cwd() + '/app/' + name
+  if fs.statSync(pluginPath).isDirectory()
+    info = {}
+    try
+      mod = require pluginPath + '/server'
+      info.server = (primus) -> mod app, primus
+    catch err
+      throw err  unless err.code is 'MODULE_NOT_FOUND'
+    for ext in ['.js', '.coffee', '.coffee.md', '.litcoffee']
+      modulePath = pluginPath + '/client' + ext
+      try
+        info.library = fs.readFileSync modulePath, 'utf8'
+      if info.library
+        unless ext is '.js'
+          info.library = coffee.compile info.library,
+            filename: modulePath
+            literate: ext isnt '.coffee'
+        info.client = coffee.compile """
+                        (primus) ->
+                          console.log 'client: #{name}'
+                      """, bare: true
+          # dummy function, needed by Primus to include the library code
+        break
+    if info.server or info.client
+      app.plugins[name] = info
+
 try
   launch = require process.cwd() + '/app/launch'
 catch err
   throw err  unless err.code is 'MODULE_NOT_FOUND'
+launch? app
 
-unless launch? app, server, primus
-  server.listen 3333
-  console.info 'server listening on :3333'
+server = http.createServer app
+
+new Primus server,
+  transformer: app.transport or 'engine.io'
+  plugin: app.plugins
+
+port = app.port or 3333
+server.listen port
+console.info "server listening on :#{port}"

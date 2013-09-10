@@ -12,7 +12,7 @@ on other packages and maximal freedom to organise the app's source files:
 * clients do not care about this, they just fetch .html, .css, and .js files
 * the server tells each client to reload HTML or refresh CSS when a file changes
 * the server will restart _itself_ whenever a source code file changes
-* optional plugins to include custom server- and/or client-side logic
+* scans for plugins to include custom server- and/or client-side logic
 * auto-installs [npm][K] and [Bower][W] package dependencies in top-level folder
 
 ## Example
@@ -84,11 +84,11 @@ plugins. Put server side code in a file named 'server.coffee' (or .js), and put
 client-side code in a file called 'client.coffee' (or .js) and it automatically
 gets picked up, i.e. launched on the server and/or sent and run on the clients.
 
-The server-side code must export a single function taking `primus` as single
-argument, because that's how Primus expects server-side plugins to be.
+The server-side code must export a single function taking 'app' and `primus` as
+arguments - this will be called as part of the Primus initialisation sequence.
 
 The client-side code can be anything, it is sent over and run as is (note that
-this happens _before_ the Primus instance gets created in `app/app.js`).
+this happens _before_ the client-side Primus instance gets created).
 
 If there is a `package.json` file in the plugin folder, then all dependencies
 will be installed in the top level before the live server starts running. If
@@ -109,6 +109,15 @@ live-reload. This is is particularly easy to do with single-page applications.
 Live-reload is implemented by sending `true` or `false` over the WebSocket
 (as JSON). These two values should be ignored in your own code when listening
 for `data` events on the `primus` object.
+
+### app/launch.{coffee,js}
+
+If this file exists, it gets loaded just before the HTTP and Primus servers get
+created. It should define a single function taking `app` as argument, and will
+be called with the Connect `app` object. The `app.plugins` field has a list of
+all the plugins - it can be adjusted or extended before Primus does its thing.
+
+Set `app.port` to change the server port of the application (default is 3333).
 
 ## License
 
