@@ -56,13 +56,14 @@ serveCompiled = (root) ->
       else
         next()
 
-watchDir = (path, cb) -> # recursive directory watcher
-  fs.stat path, (err, stats) ->
+watchDir = (dir, cb) -> # recursive directory watcher
+  fs.stat dir, (err, stats) ->
     if not err and stats.isDirectory()
-      fs.watch path, cb
-      fs.readdir path, (err, files) ->
+      fs.watch dir, (event, file) ->
+        cb event, path.join(dir, file)
+      fs.readdir dir, (err, files) ->
         unless err
-          watchDir "#{path}/#{f}", cb  for f in files
+          watchDir path.join(dir, f), cb  for f in files
 
 app = connect()
 app.use connect.logger 'dev'
@@ -94,12 +95,12 @@ app.plugins.live =
       primus.removeListener 'connection', forceReload
     , 3000 # new clients connecting after 3s no longer get a reload signal
 
-    watchDir APP_DIR, (event, path) ->
-      if /\.(js|coffee|coffee\.md|litcoffee)$/.test path
-        console.info 'exit due to code change:', path
+    watchDir APP_DIR, (event, file) ->
+      if /\.(js|coffee|coffee\.md|litcoffee)$/.test file
+        console.info 'exit due to code change:', file
         return process.exit 0
-      reload = not /\.(css|styl)$/.test path
-      console.info 'reload:', reload, '-', event, path
+      reload = not /\.(css|styl)$/.test file
+      console.info 'reload:', reload, '-', event, file
       primus.write reload  # broadcast true or false
 
   client: (primus) ->
