@@ -34,10 +34,10 @@ omitExistingInDir = (dir, packages) ->
 installNpmPackages = (packages, done) ->
   args = omitExistingInDir 'node_modules', packages
   if args.length
-    console.log 'npm will install:', args.join ', '
+    console.info 'npm will install:', args.join ', '
     execFile 'npm', ['install', args...], {}, (err, stdout, stderr) ->
       throw err  if err
-      console.log stderr
+      console.info stderr
       done()
   else
     process.nextTick done
@@ -45,14 +45,14 @@ installNpmPackages = (packages, done) ->
 installBowerPackages = (packages, done) ->
   args = omitExistingInDir 'bower_components', packages
   if args.length
-    console.log 'bower will install:', args.join ', '
+    console.info 'bower will install:', args.join ', '
     bower = require 'bower'
     # unless fs.existsSync 'bower.json'
     #   fs.writeFileSync 'bower.json', "#{JSON.stringify name: 'main'}\n"
     bower.commands.install(args)
       .on 'log', (info) ->
         if info.level is 'info'
-          console.log '   ', info.message
+          console.info '   ', info.message
       .on 'end', ->
         done()
   else
@@ -69,9 +69,9 @@ module.exports = (done) ->
   #   npmPackages.bower ?= '*'
 
   list = Object.keys npmPackages
-  console.log 'npm', list  if list.length
+  console.info 'npm', list  if list.length
   list = Object.keys bowerPackages
-  console.log 'bower', list  if list.length
+  console.info 'bower', list  if list.length
 
   installNpmPackages npmPackages, ->
     installBowerPackages bowerPackages, done

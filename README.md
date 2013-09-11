@@ -12,7 +12,7 @@ on other packages and maximal freedom to organise the app's source files:
 * clients do not care about this, they just fetch .html, .css, and .js files
 * the server tells each client to reload HTML or refresh CSS when a file changes
 * the server will restart _itself_ whenever a source code file changes
-* scans for plugins to include custom server- and/or client-side logic
+* scans for plugins to include custom host- and/or client-side logic
 * auto-installs [npm][K] and [Bower][W] package dependencies in top-level folder
 
 ## Example
@@ -58,6 +58,25 @@ primus.on 'data', (data) ->
     el.innerHTML = new Date(data)
 ```
 
+### app/launch.coffee
+
+```coffee
+module.exports = (app) ->
+
+  app.config.plugin.tick =
+    server: (primus) ->
+      setInterval ->
+        primus.write Date.now()
+      , 1000
+    client: (primus) ->
+      primus.transform 'incoming', (packet) ->
+        if typeof packet.data is 'number'
+          console.log 'tick', packet.data
+
+  app.on 'ready', ->
+    console.info "server listening on port :#{app.config.port}"
+```
+
 ## Startup
 
 Start the example server as follows and then go to <http://localhost:3333/>:
@@ -80,11 +99,11 @@ when the Primus connection object is created on the client.
 ## Plugins
 
 If there are subfolders in './app', these will be used to define additional
-plugins. Put server side code in a file named 'server.coffee' (or .js), and put
+plugins. Put host-side code in a file named 'host.coffee' (or .js), and put
 client-side code in a file called 'client.coffee' (or .js) and it automatically
 gets picked up, i.e. launched on the server and/or sent and run on the clients.
 
-The server-side code must export a single function taking 'app' and `primus` as
+The host-side code must export a single function taking 'app' and `primus` as
 arguments - this will be called as part of the Primus initialisation sequence.
 
 The client-side code can be anything, it is sent over and run as is (note that
@@ -94,7 +113,7 @@ If there is a `package.json` file in the plugin folder, then all dependencies
 will be installed in the top level before the live server starts running. If
 a `bower.json` file is found, then those dependencies will get installed too.
 
-Note that version numbers are not yet honoured, the latest version will be used.
+Version numbers are not yet honoured, the latest versions will be installed.
 
 ## Your own app
 
@@ -121,17 +140,17 @@ plugins starts. It is called with the Connect `app` object as argument.
 ### Event 'start'
 
 This event on `app` fires after all plugins have been loaded, but before the
-server and Primus objects are created (which calls the server-side plugins).
+server and Primus objects are created (which calls the host-side plugins).
 
 The `app.config.plugin` object can still be adjusted at this point, this will
-affect the actual list of server- and client-side plugins installed by Primus.
+affect the actual list of host- and client-side plugins installed by Primus.
 Keep in mind that the `client` functions will be stringified before use, they
-cannot contain any server-side variable closures.
+cannot contain any host-side variable closures.
 
 ### Event 'ready'
 
 This event on `app` fires once the server is ready to accept connections.
-All the server-side plugins have been installed at this point. The client-side
+All the host-side plugins have been installed at this point. The client-side
 scripts will be loaded in the browser(s) as part of the connection process.
 
 ## Standalone use

@@ -18,5 +18,5 @@ startWorker = (delay) ->
   , delay
 
 preflight ->
-  console.log '>>> starting live server'
+  console.info '>>> starting live server'
   startWorker 0

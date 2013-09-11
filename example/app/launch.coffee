@@ -10,4 +10,5 @@ module.exports = (app) ->
         if typeof packet.data is 'number'
           console.log 'tick', packet.data
 
-  console.info "starting server on port :#{app.config.port}"
+  app.on 'ready', ->
+      console.log "server listening on port :#{app.config.port}"
