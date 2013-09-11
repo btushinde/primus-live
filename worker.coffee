@@ -69,6 +69,7 @@ app = connect()
 app.use connect.logger 'dev'
 app.use connect.static APP_DIR, redirect: false
 app.use connect.static './bower_components', redirect: false
+app.use connect.static './node_modules', redirect: false
 app.use serveCompiled APP_DIR
 app.use connect.errorHandler()
 
@@ -103,15 +104,22 @@ app.config.plugin.live =
           if e.href and /stylesheet/i.test e.rel
             e.href = "#{e.href.replace /\?.*/, ''}?#{Date.now()}"
 
+# Execute the launch script if present
+try
+  launch = require path.resolve(APP_DIR, 'launch')
+catch err
+  throw err  unless err.code is 'MODULE_NOT_FOUND'
+launch? app
+
 # Scan through all the app subfolders to define plugins when 'client' and/or
 # 'server' modules are found inside. Server plugins are loaded right away, but
 # their main code should be in an exported function which is called by Primus.
-fs.readdirSync('./app').forEach (name) ->
-  pluginPath = path.resolve('app', name)
+fs.readdirSync(APP_DIR).forEach (name) ->
+  pluginPath = path.resolve(APP_DIR, name)
   if fs.statSync(pluginPath).isDirectory()
     plugin = {}
     for ext in ['.js', '.coffee', '.coffee.md', '.litcoffee']
-      modulePath = pluginPath + '/client' + ext
+      modulePath = path.join pluginPath, 'client' + ext
       try
         plugin.library = fs.readFileSync modulePath, 'utf8'
       if plugin.library
@@ -121,7 +129,7 @@ fs.readdirSync('./app').forEach (name) ->
             literate: ext isnt '.coffee'
         break
     try
-      host = require pluginPath + '/host'
+      host = require path.join(pluginPath, 'host')
     catch err
       throw err  unless err.code is 'MODULE_NOT_FOUND'
     host? app, plugin
@@ -129,12 +137,10 @@ fs.readdirSync('./app').forEach (name) ->
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
-try
-  launch = require path.resolve('app/launch')
-catch err
-  throw err  unless err.code is 'MODULE_NOT_FOUND'
-launch? app
+app.emit 'start'
 
 server = http.createServer app
-new Primus server, app.config
+app.primus = new Primus server, app.config
 server.listen app.config.port
+
+app.emit 'ready'

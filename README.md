@@ -112,16 +112,27 @@ for `data` events on the `primus` object.
 
 ### app/launch.{coffee,js}
 
-If this file exists, it gets loaded just before the HTTP and Primus servers are
-created. It should define a single function taking `app` as argument, and will
-be called with the Connect `app` object. The `app.config.plugin` field contains
-all plugins found in the scan - it can be adjusted before Primus does its thing.
-Keep in mind that the `client` functions will be stringified by Primus before
-use, they cannot contain any server-side variable closures.
+If this file exists, it will be loaded before the scanning and loading of
+plugins starts. It is called with the Connect `app` object as argument.
 
-Change `app.config.transport` to change the `engine.io` default for Primus.
+* set `app.config.transport` to change the `engine.io` default for Primus
+* set `app.config.port` to change the server port of the app (default 3333)
 
-Change `app.config.port` to change the server port of the app (default 3333).
+### Event 'start'
+
+This event on `app` fires after all plugins have been loaded, but before the
+server and Primus objects are created (which calls the server-side plugins).
+
+The `app.config.plugin` object can still be adjusted at this point, this will
+affect the actual list of server- and client-side plugins installed by Primus.
+Keep in mind that the `client` functions will be stringified before use, they
+cannot contain any server-side variable closures.
+
+### Event 'ready'
+
+This event on `app` fires once the server is ready to accept connections.
+All the server-side plugins have been installed at this point. The client-side
+scripts will be loaded in the browser(s) as part of the connection process.
 
 ## Standalone use
 
