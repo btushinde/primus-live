@@ -73,7 +73,7 @@ module.exports = (app) ->
         if typeof packet.data is 'number'
           console.log 'tick', packet.data
 
-  app.on 'ready', ->
+  app.on 'running', ->
     console.info "server listening on port :#{app.config.port}"
 ```
 
@@ -137,7 +137,7 @@ plugins starts. It is called with the Connect `app` object as argument.
 * set `app.config.transport` to change the `engine.io` default for Primus
 * set `app.config.port` to change the server port of the app (default 3333)
 
-### Event 'start'
+### Event 'setup'
 
 This event on `app` fires after all plugins have been loaded, but before the
 server and Primus objects are created (which calls the host-side plugins).
@@ -147,9 +147,9 @@ affect the actual list of host- and client-side plugins installed by Primus.
 Keep in mind that the `client` functions will be stringified before use, they
 cannot contain any host-side variable closures.
 
-### Event 'ready'
+### Event 'running'
 
-This event on `app` fires once the server is ready to accept connections.
+This event on `app` fires once the server is running and accepting connections.
 All the host-side plugins have been installed at this point. The client-side
 scripts will be loaded in the browser(s) as part of the connection process.
 

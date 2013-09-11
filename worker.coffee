@@ -137,10 +137,10 @@ fs.readdirSync(APP_DIR).forEach (name) ->
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
-app.emit 'start'
+app.emit 'setup'
 
 server = http.createServer app
 app.primus = new Primus server, app.config
 server.listen app.config.port
 
-app.emit 'ready'
+app.emit 'running'
