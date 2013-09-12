@@ -133,7 +133,7 @@ fs.readdirSync(APP_DIR).forEach (name) ->
     catch err
       throw err  unless err.code is 'MODULE_NOT_FOUND'
     host? app, plugin
-    if Object.keys(plugin).length
+    if host or Object.keys(plugin).length
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
