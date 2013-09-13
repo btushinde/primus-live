@@ -18,7 +18,7 @@ on other packages and maximal freedom to organise the app's source files:
 * will run `make` for all the subfolders which contain a `Makefile`
 * no temporary files are saved to disk (other than what the above tools use)
 
-Primus Live is not needed for production, deploy your app in any way you like
+Primus Live is not needed for production, deploy your app in any way you like.
 
 ## Quick start
 
