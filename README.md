@@ -17,7 +17,8 @@ on other packages and maximal freedom to organise the app's source files:
 * auto-installs [npm][K] and [Bower][W] package dependencies in top-level folder
 * will run `make` for all the subfolders which contain a `Makefile`
 * no temporary files are saved to disk (other than what the above tools use)
-* Primus Live is not needed for production, deploy your app in any way you like
+
+Primus Live is not needed for production, deploy your app in any way you like
 
 ## Quick start
 
@@ -31,6 +32,8 @@ npm install primus-live --save
 echo "require('primus-live');" >index.js
 node .
 ```
+
+The server can now be accessed on its default port at <http://localhost:3333/>.
 
 ## Included example
 
