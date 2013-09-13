@@ -13,12 +13,29 @@ on other packages and maximal freedom to organise the app's source files:
 * the server tells each client to reload HTML or refresh CSS when a file changes
 * the server will restart _itself_ whenever a source code file changes
 * scans for plugins to include custom host- and/or client-side logic
+* simple application modularity: each plugin is a subfolder in the `app/` folder
 * auto-installs [npm][K] and [Bower][W] package dependencies in top-level folder
+* will run `make` for all the subfolders which contain a `Makefile`
+* no temporary files are saved to disk (other than what the above tools use)
+* Primus Live is not needed for production, deploy your app in any way you like
 
-## Example
+## Quick start
 
-This minimal example connects and reports tick events from the server. This uses
-Jade, Stylus, and CoffeeScript, but HTML, CSS, and JavaScript would also work:
+Enter these commands to create and launch a new app with Primus Live:
+
+```
+mkdir mydemo mydemo/app
+cd mydemo
+echo '{"name":"mydemo"}' >package.json
+npm install primus-live --save
+echo "require('primus-live');" >index.js
+node .
+```
+
+## Included example
+
+This simple demo connects and reports tick events from the server. It uses
+Jade, Stylus, and CoffeeScript (HTML, CSS, and JavaScript would also work):
 
 ### app/index.jade
 
@@ -27,16 +44,15 @@ Jade, Stylus, and CoffeeScript, but HTML, CSS, and JavaScript would also work:
 html(lang='en')
   head
     meta(charset='utf-8')
-    script(src='/primus/primus.js')
-    script(src='/app.js')
-
     title Primus Live Example
     link(rel='stylesheet',href='/style.css')
 
   body
-    p
-      | Server time is: 
-      span#tick ?
+    h1 Server time
+    p#tick
+
+    script(src='/primus/primus.js')
+    script(src='/app.js')
 ```
 
 ### app/style.styl
@@ -49,8 +65,7 @@ body
 ### app/app.coffee
 
 ```coffee
-# make Primus object global for console debugging
-window.primus = new Primus
+primus = new Primus
 
 primus.on 'data', (data) ->
   if typeof data is 'number'
@@ -79,7 +94,7 @@ module.exports = (app) ->
 
 ## Startup
 
-Start the example server as follows and then go to <http://localhost:3333/>:
+Launch the example as follows and then go to <http://localhost:3333/>:
 
 ```
   npm install
@@ -112,15 +127,13 @@ this happens _before_ the client-side Primus instance gets created).
 If there is a `package.json` file in the plugin folder, then all dependencies
 will be installed in the top level before the live server starts running. If
 a `bower.json` file is found, then those dependencies will get installed too.
-Lastly, if a 'Makefile' is found, then `make` will be called (no further args).
-
 Version numbers are not yet honoured, the latest versions will be installed.
+
+Lastly, if a `Makefile` is found, then `make` will be called (no further args).
 
 ## Your own app
 
-To customise, make a copy of the `example/` folder next to it and change things
-there, so that updates of this code won't get in your way. If you name your
-folder "my-...", it will be ignored by git.
+See the **[Quick start](#quick-start)** section above for getting started.
 
 Load `primus.js` followed by a `new Primus();` on each page load to keep a
 real-time bi-directional WebSocket connection open, including the automatic

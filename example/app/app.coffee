@@ -1,5 +1,4 @@
-# make Primus object global for console debugging
-window.primus = new Primus
+primus = new Primus
 
 primus.on 'data', (data) ->
   if typeof data is 'number'

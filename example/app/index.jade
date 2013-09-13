@@ -2,14 +2,12 @@
 html(lang='en')
   head
     meta(charset='utf-8')
-    script(src='/primus/primus.js')
-    script(src='/app.js')
-
     title Primus Live Example
     link(rel='stylesheet',href='/style.css')
 
   body
-    h1 Primus Live Example
-    p
-      | The server time is: 
-      i#tick ?
+    h1 Server time
+    p#tick
+
+    script(src='/primus/primus.js')
+    script(src='/app.js')
