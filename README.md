@@ -112,6 +112,7 @@ this happens _before_ the client-side Primus instance gets created).
 If there is a `package.json` file in the plugin folder, then all dependencies
 will be installed in the top level before the live server starts running. If
 a `bower.json` file is found, then those dependencies will get installed too.
+Lastly, if a 'Makefile' is found, then `make` will be called (no further args).
 
 Version numbers are not yet honoured, the latest versions will be installed.
 

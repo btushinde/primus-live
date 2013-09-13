@@ -1,4 +1,4 @@
-# This logic installs npm and bower packages mentioned in subdirs of './app'.
+# This logic installs npm + bower packages and runs make in subdirs of './app'.
 # As a result, everything needed is there when the app starts, nicely collected
 # in the top-level 'node_modules' and 'bower_components' directories.
 
@@ -23,6 +23,16 @@ scanPackagesIn = (dir) ->
     subdir = path.join dir, file
     collectNpmFrom subdir
     collectBowerFrom subdir
+    if fs.existsSync path.join subdir, 'Makefile'
+      makeDirs.push file
+
+errorHandler = (done) ->
+  (err, stdout, stderr) ->
+    if err
+      console.info stdout.trimRight()  if stdout
+      console.error stderr.trimRight()  if stderr
+      process.exit 1
+    done()
 
 omitExistingInDir = (dir, packages) ->
   args = []
@@ -35,10 +45,7 @@ installNpmPackages = (packages, done) ->
   args = omitExistingInDir 'node_modules', packages
   if args.length
     console.info 'npm will install:', args.join ', '
-    execFile 'npm', ['install', args...], {}, (err, stdout, stderr) ->
-      throw err  if err
-      console.info stderr
-      done()
+    execFile 'npm', ['install', args...], {}, errorHandler done
   else
     process.nextTick done
 
@@ -53,13 +60,26 @@ installBowerPackages = (packages, done) ->
       .on 'log', (info) ->
         if info.level is 'info'
           console.info '   ', info.message
+      .on 'error', (err) ->
+        errorHandler(done) err, err.toString(), 'bower: *** Error 1'
       .on 'end', ->
         done()
   else
     process.nextTick done
 
+runMakefiles = (done) ->
+  if makeDirs.length
+    lines = ("cd app/#{dir} && make" for dir in makeDirs)
+    lines.unshift 'all:'
+    child = execFile 'make', ['-f', '-'], {}, errorHandler done
+    child.stdin.write lines.join('\n\t')
+    child.stdin.end()
+  else
+    process.nextTick done
+
 npmPackages = {}
 bowerPackages = []
+makeDirs = []
 
 module.exports = (done) ->
   collectBowerFrom '.'
@@ -69,9 +89,11 @@ module.exports = (done) ->
   #   npmPackages.bower ?= '*'
 
   list = Object.keys npmPackages
-  console.info 'npm', list  if list.length
+  console.info "npm:\t#{list}"  if list.length
   list = Object.keys bowerPackages
-  console.info 'bower', list  if list.length
+  console.info "bower:\t#{list}"  if list.length
+  console.info "make:\t#{makeDirs}"  if makeDirs.length
 
   installNpmPackages npmPackages, ->
-    installBowerPackages bowerPackages, done
+    installBowerPackages bowerPackages, ->
+      runMakefiles done
