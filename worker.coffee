@@ -40,10 +40,10 @@ serveCompiled = (root) ->
           marked data
       when canCompile '.js', '.coffee'
         setResponse 'application/javascript',
-          coffee.compile data
+          coffee.compile data, filename: src
       when canCompile '.js', '.coffee.md', '.litcoffee'
         setResponse 'application/javascript',
-          coffee.compile data, literate: true
+          coffee.compile data, filename: src, literate: true
       when canCompile '.css', '.styl'
         stylus.render data, { filename: src }, (err, css) ->
           throw err  if err
@@ -140,7 +140,7 @@ fs.readdirSync(APP_DIR).forEach (name) ->
 app.emit 'setup'
 
 server = http.createServer app
-app.primus = new Primus server, app.config
+primus = new Primus server, app.config
 server.listen app.config.port
 
-app.emit 'running'
+app.emit 'running', primus

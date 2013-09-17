@@ -170,6 +170,8 @@ This event on `app` fires once the server is running and accepting connections.
 All the host-side plugins have been installed at this point. The client-side
 scripts will be loaded in the browser(s) as part of the connection process.
 
+The event handlers will also get one arg: the primus object on the server.
+
 ## Standalone use
 
 The Primus Live package is not required for production use, i.e. when you don't
