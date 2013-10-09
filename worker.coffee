@@ -12,6 +12,7 @@ connect = require 'connect'
 Primus = require 'primus'
 
 APP_DIR = './app'
+CONFIG_FILE = './app/config.json'
 
 serveCompiled = (root) ->
   handler = (req, res, next) ->
@@ -111,10 +112,7 @@ catch err
   throw err  unless err.code is 'MODULE_NOT_FOUND'
 launch? app
 
-# Scan through all the app subfolders to define plugins when 'client' and/or
-# 'server' modules are found inside. Server plugins are loaded right away, but
-# their main code should be in an exported function which is called by Primus.
-fs.readdirSync(APP_DIR).forEach (name) ->
+loadPlugin = (name) ->
   pluginPath = path.resolve(APP_DIR, name)
   if fs.statSync(pluginPath).isDirectory()
     plugin = {}
@@ -136,6 +134,22 @@ fs.readdirSync(APP_DIR).forEach (name) ->
     if host or Object.keys(plugin).length
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
+
+#pre load plugins in the order specified in config file, if exists
+if fs.existsSync CONFIG_FILE
+  config = fs.readFileSync CONFIG_FILE, 'utf8'
+  config = JSON.parse(config)
+  for pluginName in config.pluginLoadOrder
+    loadPlugin pluginName
+
+# Scan through all the app subfolders to define plugins when 'client' and/or
+# 'server' modules are found inside. Server plugins are loaded right away, but
+# their main code should be in an exported function which is called by Primus.
+# Don't reload any preloaded plugins
+fs.readdirSync(APP_DIR).forEach (name) ->
+  if app.config.plugin[name] 
+    return
+  loadPlugin name
 
 app.emit 'setup'
 
