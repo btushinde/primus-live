@@ -12,7 +12,6 @@ connect = require 'connect'
 Primus = require 'primus'
 
 APP_DIR = './app'
-CONFIG_FILE = './app/config.json'
 
 serveCompiled = (root) ->
   handler = (req, res, next) ->
@@ -135,10 +134,12 @@ loadPlugin = (name) ->
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
-#pre load plugins in the order specified in config file, if exists
-if fs.existsSync CONFIG_FILE
-  config = fs.readFileSync CONFIG_FILE, 'utf8'
-  config = JSON.parse(config)
+# Pre-load plugins in the order specified in config file, if exists
+try
+  config = require path.resolve(APP_DIR, 'config')
+catch err
+  throw err  unless err.code is 'MODULE_NOT_FOUND'
+if config?.pluginLoadOrder
   for pluginName in config.pluginLoadOrder
     loadPlugin pluginName
 
