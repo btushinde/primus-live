@@ -104,11 +104,15 @@ app.config.plugin.live =
           if e.href and /stylesheet/i.test e.rel
             e.href = "#{e.href.replace /\?.*/, ''}?#{Date.now()}"
 
+# Try to load a module via CommonJS, or return undefined otherwise
+loadIfFileExists = (fileRoot) ->
+  try
+    require fileRoot
+  catch err
+    throw err  unless err.code is 'MODULE_NOT_FOUND'
+
 # Execute the launch script if present
-try
-  launch = require path.resolve(APP_DIR, 'launch')
-catch err
-  throw err  unless err.code is 'MODULE_NOT_FOUND'
+launch = loadIfFileExists path.resolve(APP_DIR, 'launch')
 launch? app
 
 loadPlugin = (name) ->
@@ -125,20 +129,14 @@ loadPlugin = (name) ->
             filename: modulePath
             literate: ext isnt '.coffee'
         break
-    try
-      host = require path.join(pluginPath, 'host')
-    catch err
-      throw err  unless err.code is 'MODULE_NOT_FOUND'
+    host = loadIfFileExists path.join(pluginPath, 'host')
     host? app, plugin
     if host or Object.keys(plugin).length
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
 # Pre-load plugins in the order specified in config file, if exists
-try
-  config = require path.resolve(APP_DIR, 'config')
-catch err
-  throw err  unless err.code is 'MODULE_NOT_FOUND'
+config = loadIfFileExists path.resolve(APP_DIR, 'config')
 if config?.pluginLoadOrder
   for pluginName in config.pluginLoadOrder
     loadPlugin pluginName
@@ -146,11 +144,10 @@ if config?.pluginLoadOrder
 # Scan through all the app subfolders to define plugins when 'client' and/or
 # 'server' modules are found inside. Server plugins are loaded right away, but
 # their main code should be in an exported function which is called by Primus.
-# Don't reload any preloaded plugins
+# Don't reload any preloaded plugins.
 fs.readdirSync(APP_DIR).forEach (name) ->
-  if app.config.plugin[name] 
-    return
-  loadPlugin name
+  unless app.config.plugin[name] 
+    loadPlugin name
 
 app.emit 'setup'
 
