@@ -1,6 +1,6 @@
 {
   "name": "primus-live",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Live reload with Jade/Stylus/CoffeeScript/Markdown support",
   "main": "index.js",
   "repository": {
