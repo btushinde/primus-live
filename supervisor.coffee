@@ -4,10 +4,9 @@
 cluster = require 'cluster'
 preflight = require './preflight'
 
-# Load via CoffeeScript, which is known to be installed as local dependency
+# Indirectly load worker.coffee code, so that we can load CoffeeScript first
 cluster.setupMaster
-  exec: __dirname + '/node_modules/.bin/coffee'
-  args: [__dirname + '/worker.coffee']
+  exec: __dirname + '/child.js'
 
 cluster.on 'exit', (worker, code, signal) ->
   exitCode = worker.process.exitCode
