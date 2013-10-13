@@ -135,11 +135,9 @@ loadPlugin = (name) ->
       plugin.client ?= -> # need some function, else Primus will complain
       app.config.plugin[name] = plugin
 
-# Pre-load plugins in the order specified in config file, if exists
-config = loadIfFileExists path.resolve(APP_DIR, 'config')
-if config?.pluginLoadOrder
-  for pluginName in config.pluginLoadOrder
-    loadPlugin pluginName
+# Allow loading certain modules before the rest
+for plugin in app.config.loadFirst or []
+  loadPlugin plugin
 
 # Scan through all the app subfolders to define plugins when 'client' and/or
 # 'server' modules are found inside. Server plugins are loaded right away, but

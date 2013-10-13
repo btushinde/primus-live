@@ -1,5 +1,8 @@
 module.exports = (app) ->
-
+  # specify which modules need to be loaded first, and in what order
+  app.config.loadFirst = ['main']
+  
+  # define a "tick" plugin
   app.config.plugin.tick =
     server: (primus) ->
       setInterval ->

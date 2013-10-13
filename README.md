@@ -153,6 +153,7 @@ plugins starts. It is called with the Connect `app` object as argument.
 
 * set `app.config.transport` to change the `engine.io` default for Primus
 * set `app.config.port` to change the server port of the app (default 3333)
+* set `app.config.firstLoad` to the list of modules to load before the rest
 
 ### Event 'setup'
 
