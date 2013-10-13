@@ -13,10 +13,10 @@
     "primus": "~1.4.0",
     "engine.io": "~0.7.9",
     "jade": "~0.35.0",
-    "stylus": "~0.37.0",
+    "stylus": "~0.38.0",
     "coffee-script": "~1.6.3",
     "marked": "~0.2.9",
-    "connect": "~2.8.8",
+    "connect": "~2.9.0",
     "bower": "~1.2.6"
   }
 }
