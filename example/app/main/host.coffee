@@ -1,3 +1,3 @@
-module.exports = (app, plugin) ->  
+module.exports = (app, plugin) ->
   app.on 'setup', ->
-  	console.log('Main Plugin Setup')
+    console.log('Main Plugin Setup')

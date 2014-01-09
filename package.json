@@ -1,6 +1,6 @@
 {
   "name": "primus-live",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Live reload with Jade/Stylus/CoffeeScript/Markdown support",
   "main": "index.js",
   "repository": {
@@ -10,13 +10,13 @@
   "author": "Jean-Claude Wippler",
   "license": "MIT",
   "dependencies": {
-    "primus": "~1.4.0",
-    "engine.io": "~0.7.9",
-    "jade": "~0.35.0",
-    "stylus": "~0.38.0",
+    "primus": "~1.5.2",
+    "engine.io": "~0.8.0",
+    "jade": "~1.1.2",
+    "stylus": "~0.42.0",
     "coffee-script": "~1.6.3",
-    "marked": "~0.2.9",
-    "connect": "~2.9.0",
-    "bower": "~1.2.6"
+    "marked": "~0.3.0",
+    "connect": "~2.12.0",
+    "bower": "~1.2.8"
   }
 }
