@@ -10,9 +10,22 @@ coffee = require 'coffee-script'
 marked = require 'marked'
 connect = require 'connect'
 Primus = require 'primus'
+convert = require 'convert-source-map'
 
 APP_DIR = './app'
 
+compileCoffeeScript = (sourceCode, filename) ->
+  compiled = coffee.compile sourceCode,
+    filename: filename
+    sourceMap: true
+    inline: true
+    literate: path.extname(filename) isnt '.coffee'
+  comment = convert
+    .fromJSON(compiled.v3SourceMap)
+    .setProperty('sources', [filename]) 
+    .toComment()
+  "#{compiled.js}\n#{comment}\n"
+  
 serveCompiled = (root) ->
   handler = (req, res, next) ->
     dest = root + req.uri.pathname
@@ -38,12 +51,9 @@ serveCompiled = (root) ->
       when canCompile '.html', '.md'
         setResponse 'text/html',
           marked data
-      when canCompile '.js', '.coffee'
+      when canCompile '.js', '.coffee', '.coffee.md', '.litcoffee'
         setResponse 'application/javascript',
-          coffee.compile data, filename: src
-      when canCompile '.js', '.coffee.md', '.litcoffee'
-        setResponse 'application/javascript',
-          coffee.compile data, filename: src, literate: true
+          compileCoffeeScript data, src
       when canCompile '.css', '.styl'
         stylus.render data, { filename: src }, (err, css) ->
           throw err  if err
@@ -125,9 +135,7 @@ loadPlugin = (name) ->
         plugin.library = fs.readFileSync modulePath, 'utf8'
       if plugin.library
         unless ext is '.js'
-          plugin.library = coffee.compile plugin.library,
-            filename: modulePath
-            literate: ext isnt '.coffee'
+          plugin.library = compileCoffeeScript plugin.library, modulePath
         break
     host = loadIfFileExists path.join(pluginPath, 'host')
     host? app, plugin
