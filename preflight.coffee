@@ -5,7 +5,16 @@
 fs = require 'fs'
 path = require 'path'
 {execFile} = require 'child_process'
+package_json = {}
+npmInstallOpts = ""
 
+try
+  package_json = require './package.json'
+  if package_json["npm_install_flags_" + process.platform]  
+    npmInstallOpts = package_json["npm_install_flags_" + process.platform]
+catch err
+  #ignore
+  
 addDependenciesTo = (results, filename) ->
   if fs.existsSync filename
     json = JSON.parse fs.readFileSync filename
@@ -44,8 +53,9 @@ omitExistingInDir = (dir, packages) ->
 installNpmPackages = (packages, done) ->
   args = omitExistingInDir 'node_modules', packages
   if args.length
-    console.info 'npm will install:', args.join ', '
-    execFile 'npm', ['install', args...], {}, errorHandler done
+    console.info "npm will install:#{npmInstallOpts} " , args.join ', '
+    npmstub = if process.platform == "win32" then "npm.cmd" else "npm"
+    execFile npmstub, ['install', npmInstallOpts, args...], {env:process.env}, errorHandler done
   else
     process.nextTick done
 
@@ -71,7 +81,7 @@ runMakefiles = (done) ->
   if makeDirs.length
     lines = ("cd app/#{dir} && make" for dir in makeDirs)
     lines.unshift 'all:'
-    child = execFile 'make', ['-f', '-'], {}, errorHandler done
+    child = execFile 'make', ['-f', '-'], {env:process.env}, errorHandler done
     child.stdin.write lines.join('\n\t')
     child.stdin.end()
   else
